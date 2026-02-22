@@ -1,0 +1,13 @@
+package org.bme.picture_viewer;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class PictureViewerApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(PictureViewerApplication.class, args);
+	}
+
+}
