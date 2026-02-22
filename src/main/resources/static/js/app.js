@@ -133,8 +133,10 @@ async function loadPictures() {
 }
 
 function sortBy(sort) {
-  currentSort = sort;
-  loadPictures();
+    currentSort = sort;
+    const sel = document.getElementById('sort-select');
+    if (sel) sel.value = sort;
+    loadPictures();
 }
 
 function renderPictures(pictures) {
