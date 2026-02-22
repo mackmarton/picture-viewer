@@ -161,7 +161,7 @@ function renderPictures(pictures) {
                 ${currentUser ? `
                 <div class="card-footer">
                     <button class="btn btn-sm btn-outline-danger w-100"
-                            onclick="confirmDelete(${p.id})">Törlés</button>
+                            onclick="deleteWithId(${p.id})">Törlés</button>
                 </div>` : ''}
             </div>
         </div>`).join('');
@@ -184,14 +184,12 @@ async function openDetail(id) {
   showPage('detail');
 }
 
-async function confirmDelete(id) {
-  if (!confirm('Biztosan törlöd ezt a képet?')) return;
+async function deleteWithId(id) {
   currentPictureId = id;
   await deletePicture();
 }
 
 async function deletePicture() {
-  if (!confirm('Biztosan törlöd ezt a képet?')) return;
   const res = await fetch(`/api/pictures/${currentPictureId}`, {
     method: 'DELETE',
     credentials: 'include'
