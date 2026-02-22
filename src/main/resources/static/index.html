@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Fényképalbum</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"/>
+    <style>
+        .card-img-top { object-fit: cover; height: 200px; cursor: pointer; }
+        #page-detail img { max-height: 80vh; }
+        .page { display: none; }
+        .page.active { display: block; }
+    </style>
+</head>
+<body class="bg-light">
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" href="#" onclick="showPage('list')">📷 Fényképalbum</a>
+        <div class="navbar-nav ms-auto align-items-center gap-2">
+            <a class="nav-link" href="#" onclick="showPage('list'); sortBy('name')">Név szerint</a>
+            <a class="nav-link" href="#" onclick="showPage('list'); sortBy('date')">Dátum szerint</a>
+            <span id="nav-guest">
+                <a class="nav-link" href="#" onclick="showPage('login')">Bejelentkezés</a>
+            </span>
+            <span id="nav-user" class="d-none align-items-center gap-2">
+                <span class="text-light small" id="nav-username"></span>
+                <button class="btn btn-sm btn-outline-light" onclick="logout()">Kilépés</button>
+            </span>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <div id="flash"></div>
+
+    <div id="page-list" class="page active">
+
+        <div id="upload-card" class="card mb-4 d-none">
+            <div class="card-header bg-primary text-white">Új kép feltöltése</div>
+            <div class="card-body">
+                <form id="upload-form" onsubmit="uploadPicture(event)">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-4">
+                            <label class="form-label">Kép neve (max. 40 kar.)</label>
+                            <input type="text" id="upload-name" class="form-control"
+                                   maxlength="40" placeholder="Pl. Nyári piknik" required/>
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label">Képfájl</label>
+                            <input type="file" id="upload-file" class="form-control"
+                                   accept="image/*" required/>
+                        </div>
+                        <div class="col-md-3">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <span id="upload-spinner" class="spinner-border spinner-border-sm d-none"></span>
+                                Feltöltés
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="picture-grid" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4"></div>
+        <p id="no-pictures" class="text-center text-muted py-5 d-none">Még nincs feltöltött kép.</p>
+    </div>
+
+    <div id="page-detail" class="page text-center">
+        <h2 id="detail-name" class="mb-1"></h2>
+        <p id="detail-meta" class="text-muted mb-3"></p>
+        <img id="detail-img" src="" alt="" class="img-fluid rounded shadow mb-3"/>
+        <div>
+            <button class="btn btn-secondary me-2" onclick="showPage('list')">← Vissza</button>
+            <button id="detail-delete-btn" class="btn btn-danger d-none"
+                    onclick="deletePicture()">Törlés</button>
+        </div>
+    </div>
+
+    <div id="page-login" class="page">
+        <div class="row justify-content-center">
+            <div class="col-md-5">
+                <div class="card shadow">
+                    <div class="card-header bg-dark text-white text-center"><h4>Bejelentkezés</h4></div>
+                    <div class="card-body">
+                        <form onsubmit="login(event)">
+                            <div class="mb-3">
+                                <label class="form-label">Felhasználónév</label>
+                                <input type="text" id="login-username" class="form-control" required autofocus/>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Jelszó</label>
+                                <input type="password" id="login-password" class="form-control" required/>
+                            </div>
+                            <button type="submit" class="btn btn-dark w-100">Belépés</button>
+                        </form>
+                    </div>
+                    <div class="card-footer text-center">
+                        <small>Nincs még fiókod?
+                            <a href="#" onclick="showPage('register')">Regisztráció</a>
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="page-register" class="page">
+        <div class="row justify-content-center">
+            <div class="col-md-5">
+                <div class="card shadow">
+                    <div class="card-header bg-dark text-white text-center"><h4>Regisztráció</h4></div>
+                    <div class="card-body">
+                        <form onsubmit="register(event)">
+                            <div class="mb-3">
+                                <label class="form-label">Felhasználónév</label>
+                                <input type="text" id="reg-username" class="form-control"
+                                       minlength="3" maxlength="50" required/>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">E-mail cím</label>
+                                <input type="email" id="reg-email" class="form-control" required/>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Jelszó</label>
+                                <input type="password" id="reg-password" class="form-control"
+                                       minlength="6" required/>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Jelszó megerősítése</label>
+                                <input type="password" id="reg-confirm" class="form-control" required/>
+                            </div>
+                            <button type="submit" class="btn btn-dark w-100">Regisztráció</button>
+                        </form>
+                    </div>
+                    <div class="card-footer text-center">
+                        <small>Már van fiókod?
+                            <a href="#" onclick="showPage('login')">Bejelentkezés</a>
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="mt-5 py-3 bg-light text-center border-top">
+    <small class="text-muted">Fényképalbum &copy; 2025 – BME</small>
+</footer>
+
+<script src="/js/app.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
