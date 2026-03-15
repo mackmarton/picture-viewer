@@ -65,5 +65,9 @@ public class PictureService {
 
         pictureRepository.delete(picture);
     }
+
+    public Picture findByName(String name) {
+        return pictureRepository.findByName(name);
+    }
 }
 

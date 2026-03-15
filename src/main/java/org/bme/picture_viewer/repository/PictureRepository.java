@@ -8,5 +8,6 @@ import java.util.List;
 public interface PictureRepository extends JpaRepository<Picture, Long> {
     List<Picture> findAllByOrderByNameAsc();
     List<Picture> findAllByOrderByUploadedAtDesc();
+    Picture findByName(String name);
 }
 

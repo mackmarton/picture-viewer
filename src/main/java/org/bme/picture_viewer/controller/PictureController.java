@@ -40,6 +40,11 @@ public class PictureController {
         return PictureResponseDto.from(pictureService.findById(id));
     }
 
+    @GetMapping("/name")
+    public PictureResponseDto getPicture(@RequestParam String name) {
+        return PictureResponseDto.from(pictureService.findByName(name));
+    }
+
     @PostMapping
     public ResponseEntity<PictureResponseDto> uploadPicture(
             @Valid @ModelAttribute PictureUploadDto dto,
