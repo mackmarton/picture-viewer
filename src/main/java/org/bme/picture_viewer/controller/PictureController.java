@@ -65,4 +65,11 @@ public class PictureController {
         pictureService.delete(id);
         return ResponseEntity.noContent().build();
     }
+
+    @DeleteMapping("/deleteall")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Void> deleteAll() throws IOException {
+        pictureService.deleteAll();
+        return ResponseEntity.noContent().build();
+    }
 }

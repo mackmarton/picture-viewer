@@ -45,16 +45,19 @@ function setUser(username) {
   const guest = document.getElementById('nav-guest');
   const user = document.getElementById('nav-user');
   const uploadCard = document.getElementById('upload-card');
+  const deleteAllBtn = document.getElementById('delete-all-btn');
 
   if (username) {
     guest.classList.add('d-none');
     user.classList.remove('d-none');
     document.getElementById('nav-username').textContent = username;
     uploadCard.classList.remove('d-none');
+    if (deleteAllBtn) deleteAllBtn.classList.remove('d-none');
   } else {
     guest.classList.remove('d-none');
     user.classList.add('d-none');
     uploadCard.classList.add('d-none');
+    if (deleteAllBtn) deleteAllBtn.classList.add('d-none');
   }
 }
 
@@ -207,6 +210,26 @@ async function deletePicture() {
   }
 }
 
+// New: delete all pictures
+async function deleteAllPictures() {
+  const btn = document.getElementById('delete-all-btn');
+  btn.disabled = true;
+  const originalText = btn.textContent;
+  btn.textContent = 'Törlés...';
+
+  try {
+    await fetch('/api/pictures/deleteall', {
+      method: 'DELETE',
+      credentials: 'include'
+    });
+
+    await loadPictures();
+  } finally {
+    btn.disabled = false;
+    btn.textContent = originalText;
+  }
+}
+
 async function uploadPicture(event) {
   event.preventDefault();
   const name = document.getElementById('upload-name').value.trim();
@@ -251,4 +274,3 @@ function formatDate(isoString) {
     String(d.getHours()).padStart(2, '0') + ':' +
     String(d.getMinutes()).padStart(2, '0');
 }
-

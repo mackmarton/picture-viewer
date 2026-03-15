@@ -12,12 +12,14 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.session.jdbc.config.annotation.web.http.EnableJdbcHttpSession;
 import org.springframework.web.filter.ForwardedHeaderFilter;
 
 import java.io.IOException;
 
 @Configuration
 @EnableWebSecurity
+@EnableJdbcHttpSession
 @RequiredArgsConstructor
 public class SecurityConfig {
 
