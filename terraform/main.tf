@@ -40,5 +40,5 @@ resource "heroku_app" "picture_viewer" {
 
 resource "heroku_addon" "postgres_db" {
   app_id  = heroku_app.picture_viewer.id
-  plan    = "heroku-postgresql:eco"
+  plan    = "heroku-postgresql:essential-0"
 }
