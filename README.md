@@ -18,16 +18,17 @@
 **Regisztráció:**
 - A jobb felső sarokban lévő "Bejelentkezés" linkre kattintva, alul található a regisztrációs lehetőség
 - Felhasználónév és jelszó megadása szükséges (felhasználónév maximum 20 karakter)
-
+-----
 ## Architektúra dokumentáció
 
 ### Technológia Stack és szolgáltatók
 
 - **Backend:** Java Spring Boot
-- **Adatbázis:** PostgreSQL a Neon providernél
+- **Adatbázis:** Heroku Postgres (IaC által menedzselve)
 - **Képtárolás:** Cloudinary (CDN)
-- **Frontend:** JavaScript Single Page Application (Egyszerű hostolás miatt)
+- **Frontend:** JavaScript Single Page Application
 - **PaaS szolgáltató:** Heroku
+- **CI/CD & IaC:** GitHub Actions, HashiCorp Terraform, HCP Terraform
 
 ### API Végpontok
 
@@ -43,7 +44,7 @@
 - `POST /api/pictures` - Új kép feltöltése (csak bejelentkezve)
 - `DELETE /api/pictures/{id}` - Kép törlése (csak bejelentkezve)
 
-**Fronend:**
+**Frontend:**
 - `GET /` - Maga a felhasználói felület
 
 ### Biztonsági megoldások
@@ -54,18 +55,22 @@ Az autorizáció gondoskodik arról, hogy csak bejelentkezett felhasználók tö
 
 A bemenetek backend és frontend oldalon is validálásra kerülnek. 
 
-### Heroku konfiguráció
+## Infrastructure-as-Code (IaC) Munkamenet
 
-Az alkalmazás Herokuval való összekötéséhez nincs más dolgunk mint a Heroku dashboardon kiválasztani a megfelelő GitHub repository-t majd beállítani a következő környezeti változókat (Config Vars):
-- `CLOUDINARY_CLOUD_NAME`
-- `CLOUDINARY_API_KEY`
-- `CLOUDINARY_API_SECRET`
-- `SPRING_DATASOURCE_URL`
-- `SPRING_DATASOURCE_USERNAME`
-- `SPRING_DATASOURCE_PASSWORD`
+A felhőbeli infrastruktúra (szerver, adatbázis, környezeti változók) automatizált felépítéséhez és naprakészen tartásához **Infrastructure-as-Code** megközelítést alkalmaztam. Ez kiküszöböli a manuális "kattintgatást" a szolgáltatói felületeken, és reprodukálhatóvá teszi a rendszert.
 
-A `PORT` változó beállítására nincs szükség mivel a Heroku automatikusan beállítja azt.
+### Használt eszközök
+* **HashiCorp Terraform:** Az infrastruktúra deklaratív leírására és módosítására.
+* **HCP Terraform (Terraform Cloud):** Remote backendként szolgál a Terraform állapot felhőbeli, biztonságos tárolására. Ez a kulcsa annak, hogy a folyamatos frissítések során az **adatbázis és a benne lévő adatok ne törlődjenek**, az infrastruktúra folytonossága megmaradjon.
+* **GitHub Actions:** Az automatizált CI/CD folyamatok vezérlésére (IaC telepítés, majd szoftver deploy).
 
-### Build és Deploy folyamat
+### Konfigurált komponensek
+A Terraform kód (`main.tf`) a következő erőforrásokat hozza létre és konfigurálja a Heroku platformon:
+1. **Heroku App (`heroku_app`):** Az alkalmazás futtatókörnyezete (PaaS szerver).
+2. **Heroku Postgres (`heroku_addon`):** Egy dedikált PostgreSQL adatbázis. A Terraform gondoskodik a függőségkezelésről, így a generált adatbázis hitelesítő adatai (`DATABASE_URL`) automatikusan "bedrótozódnak" a Heroku alkalmazás környezeti változói közé.
 
-Az alkalmazás buildeléséért és telepítéséért a Heroku felelős. Automatikusan észleli a main branchre való push -t és elkezdi a buildet. Amennyiben az sikeresen végződik az alkalmazás telepítésre kerül és elérhető a heroku által megadott URL -n.
+### Build és Deploy folyamat (CI/CD)
+
+A fejlesztési folyamat teljesen automatizált a GitHub Actions segítségével. A `main` ágra történő minden egyes *push* esetén a következő lépések futnak le:
+1. **Infrastruktúra ellenőrzése:** A GitHub Actions bejelentkezik a HCP Terraformba, és a `terraform apply` paranccsal frissíti/létrehozza a Heroku erőforrásokat a kód alapján.
+2. **Szoftver telepítése:** Ha az infrastruktúra (és az adatbázis) készen áll, a pipeline egy natív `git push` parancs segítségével feltölti az alkalmazás forráskódját a Herokura, ami automatikusan lefordítja és elindítja az új verziót.
